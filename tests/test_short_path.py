@@ -72,7 +72,7 @@ def test_multiple_short_ways_search(I, J, V, size, start_verts, expected):
         ),
     ],
 )
-def test_sssp(I, J, V, size, start_vert, expected):
+def test_single_short_ways_search(I, J, V, size, start_vert, expected):
     matrix_graph = gb.Matrix.from_lists(I, J, V, nrows=size, ncols=size)
     answer = s_get_short_ways(matrix_graph, start_vert)
     assert answer == expected

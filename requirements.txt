@@ -1,5 +1,4 @@
 black
-click==8.0.4
 pre-commit
 pygraphblas
 pytest
