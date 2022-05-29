@@ -10,16 +10,27 @@ def m_get_short_ways(matrix_graph: gb.Matrix, start_verts):
     fronts = gb.Matrix.sparse(
         matrix_graph.type, nrows=len(start_verts), ncols=matrix_graph.ncols
     )
+    visited = gb.Matrix.sparse(
+        gb.types.BOOL, nrows=len(start_verts), ncols=matrix_graph.ncols
+    )
 
     for i, j in enumerate(start_verts):
         fronts.assign_scalar(0, i, j)
+        visited.assign_scalar(True, i, j)
 
-    for _ in range(matrix_graph.nrows):
+    prev_nnz = -1
+    while prev_nnz != visited.nvals:
+        prev_nnz = visited.nvals
+
         fronts.mxm(
             matrix_graph,
             semiring=matrix_graph.type.min_plus,
             out=fronts,
             accum=matrix_graph.type.min,
+        )
+
+        visited.eadd(
+            fronts, visited.type.lxor_monoid, out=visited, desc=gb.descriptor.R
         )
 
     result = []
