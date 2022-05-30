@@ -4,22 +4,15 @@ __all__ = ["get_triang_amount"]
 
 
 def get_triang_amount(matrix_graph_in: gb.Matrix):
-
-    matrix_graph_in = matrix_graph_in.tril() + matrix_graph_in.triu().transpose()
-    matrix_graph = matrix_graph_in + matrix_graph_in.transpose()
+    matrix_graph = matrix_graph_in
+    matrix_graph.union(matrix_graph.transpose(), out=matrix_graph)
 
     res = matrix_graph
 
-    for i in range(2):
-        res = matrix_graph.mxm(res, cast=gb.types.INT64, accum=gb.types.INT64.PLUS)
+    res = matrix_graph.mxm(res, cast=gb.types.INT64, mask=res)
 
-    res = res.diag().reduce_vector()
-    res /= 2
-
-    vert_lst, triang_lst = res.to_lists()
-    result = [0] * matrix_graph.nrows
-
-    for i, vert in enumerate(vert_lst):
-        result[vert] = triang_lst[i]
-
+    result = []
+    for i in range(res.nrows):
+        result.append(sum(list(res[i].vals)))
+    result = [elem // 2 for elem in result]
     return result
