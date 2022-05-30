@@ -18,11 +18,9 @@ def m_get_short_ways(matrix_graph: gb.Matrix, start_verts):
         fronts.assign_scalar(0, i, j)
         visited.assign_scalar(True, i, j)
 
-    steps = 0
     prev_nnz = -1
     while prev_nnz != visited.nvals:
         prev_nnz = visited.nvals
-        steps += 1
 
         fronts.mxm(
             matrix_graph,
