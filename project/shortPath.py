@@ -1,4 +1,5 @@
 import pygraphblas as gb
+import numpy as np
 from pygraphblas import INT64
 
 __all__ = ["m_get_short_ways", "s_get_short_ways"]
@@ -10,17 +11,13 @@ def m_get_short_ways(matrix_graph: gb.Matrix, start_verts):
     fronts = gb.Matrix.sparse(
         matrix_graph.type, nrows=len(start_verts), ncols=matrix_graph.ncols
     )
-    visited = gb.Matrix.sparse(
-        gb.types.BOOL, nrows=len(start_verts), ncols=matrix_graph.ncols
-    )
 
     for i, j in enumerate(start_verts):
         fronts.assign_scalar(0, i, j)
-        visited.assign_scalar(True, i, j)
 
-    prev_nnz = -1
-    while prev_nnz != visited.nvals:
-        prev_nnz = visited.nvals
+    old_fronts = np.copy(fronts)
+
+    for n in range(matrix_graph.nrows - 1):
 
         fronts.mxm(
             matrix_graph,
@@ -29,9 +26,10 @@ def m_get_short_ways(matrix_graph: gb.Matrix, start_verts):
             accum=matrix_graph.type.min,
         )
 
-        visited.eadd(
-            fronts, visited.type.lxor_monoid, out=visited, desc=gb.descriptor.R
-        )
+        if np.array_equal(old_fronts, fronts):
+            break
+
+        old_fronts = np.copy(fronts)
 
     result = []
     for i, j in enumerate(start_verts):
